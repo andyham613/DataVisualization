@@ -10,5 +10,5 @@ Some examples:
 ![alt text](https://github.com/andyham613/DataVisualization/blob/master/screenshots/dvp22.JPG)
 ![alt text](https://github.com/andyham613/DataVisualization/blob/master/screenshots/dvp32.JPG)
 ![alt text](https://github.com/andyham613/DataVisualization/blob/master/screenshots/dvp2.JPG)
-![alt text](https://github.com/andyham613/DataVisualization/blob/master/screenshots/dvp3.JPG)
-![alt text](https://github.com/andyham613/DataVisualization/blob/master/screenshots/dvp22.JPG)
+![alt text](https://github.com/andyham613/DataVisualization/blob/master/screenshots/dvp33.JPG)
+![alt text](https://github.com/andyham613/DataVisualization/blob/master/screenshots/dvp1.JPG)
