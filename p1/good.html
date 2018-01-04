@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<style>
+/* all element styling should go here */
+
+.legend {
+    font-size: 12px;
+  }
+  rect {
+    stroke-width: 2;
+  }
+.arc text {
+  font: 10px sans-serif;
+  text-anchor: middle;
+}
+
+
+</style>
+<svg id="thevis" width="800" height="500"></svg> <!-- do not change this line -->
+<script src="lib/d3.v4.js"></script> <!-- change to d3.v3.js if you want -->
+<script src="student.js"></script> <!-- do not change this line -->
+<script>
+/* code for creating good visualization goes here */
+
+
+
+
+
+var margin = {top: 30, right: 10, bottom: 20, left: 30};
+
+
+// console.log(+d3.select("svg").attr("width"));
+// console.log(+d3.select("svg").attr("width"));
+var width = +d3.select("svg").attr("width") -40;
+var height = +d3.select("svg").attr("height") -40;
+var radius = height/2.5;
+
+var svg = d3.select("svg")
+  .append("g")
+  .attr("transform", "translate(" + width/2 + "," + height/1.6 + ")");
+
+var color = d3.scaleOrdinal(d3.schemeCategory20);
+
+
+var path = d3.arc()
+  .innerRadius(0)
+  //.outerRadius(radius);
+  .outerRadius(function(d) {return (radius * (d.data.recovery/10)) ;});
+  //function(d) {return radius + d.recovery;});
+
+var pie = d3.pie()
+  .value(function(d) { return d.percentage;});
+  //.sort(null);
+
+var percent = d3.arc()
+  .outerRadius(radius - 80)
+  .innerRadius(radius - 70);
+
+var recovery = d3.arc()
+  .outerRadius(function(d) {return (radius * (d.data.recovery/10))+ 20;})
+  .innerRadius(function(d) {return (radius* (d.data.recovery/10)) + 10;});
+
+var thedata;
+
+//GET DATA
+d3.csv("data/asics.csv", function(d) {
+  d.percentage = +d.percentage;
+  d.recovery = +d.recovery;
+  return d;
+}, function(error, data) {
+  if (error) throw error;
+
+  var arc = svg.selectAll('.arc')
+    .data(pie(data))
+    .enter()
+      .append('g')
+      .attr("class", "arc");
+
+  arc.append("path")
+      .attr('d', path)
+      .attr('fill', function(d, i) {
+        console.log(d.data.part);
+        return color(d.data.part);
+    });
+
+
+  arc.append("text")
+    .attr("transform", function(d) { return "translate(" + percent.centroid(d) + ")"; })
+    .attr("dy", "0.35em")
+    .text(function(d) { return d.data.percentage+"%"; });
+
+  arc.append("text")
+    .attr("transform", function(d) { return "translate(" + recovery.centroid(d) + ")"; })
+    .attr("dy", "0.35em")
+    .text(function(d) { return d.data.recovery+"d"; });
+
+
+  var square = 20;
+  var space = 5;
+  var legend = svg.selectAll('.legend')
+    .data(color.domain())
+    .enter()
+    .append('g')
+    .attr('class', 'legend')
+    .attr('transform', function(d, i) {
+      var offset =  (square + space) * color.domain().length / 2;
+      return 'translate(' + (-18 * square) + ',' + (i * (square + space) - offset) + ')';
+    });
+  legend.append('rect')
+    .attr('width', square)
+    .attr('height', square)
+    .style('fill', color)
+    .style('stroke', color);
+
+  legend.append('text')
+    .attr('x', square + space)
+    .attr('y', square - space)
+    .text(function(d) { console.log(d); return d; });
+  d3.select("svg").append("text")
+    .attr("x", width/7 )
+    .attr("y", 20)
+    .style("font-size", "25px")
+    .text("Frequency and Recovery Time of Running Injuries");
+  d3.select("svg").append("text")
+    .attr("x", width/5 )
+    .attr("y", 50)
+    .style("font-size", "12px")
+    .text("Legend on the left for location of injury, percentages labeled in each slice indicating frequency");
+  d3.select("svg").append("text")
+    .attr("x", width/4.5 )
+    .attr("y", 70)
+    .style("font-size", "12px")
+    .text("d refers to average number of days needed for that type of injury to recover");
+});
+
+
+
+
+
+
+
+/* Answer assignment questions here:
+
+
+References:
+http://zeroviscosity.com/d3-js-step-by-step/step-3-adding-a-legend
+http://bl.ocks.org/dbuezas/9306799
+https://bl.ocks.org/mbostock/3887235
+http://bl.ocks.org/enjalot/1203641
+
+1)
+a) part: body part is encoded by color, and laid out by pie chart. Each slice corresponds
+        to a specific body part; refer to the legend on the left.
+
+b) percentage: Percentage is encoded by the angle of each slice, laid out in pie chart.
+              Larger the angle, higher the frequency for that type of injury.
+
+c) recovery: Recovery is encoded by radius of each slice, laid out in pie chart.
+            The longer the radius, the more days of recovery required.
+
+
+2) This pie chart easily separates body parts by colored slices. Percentages are directly related to the angles of each slice.
+ The angles are sorted in descending order so it's easy to see extremal percentage values.
+  Recovery time corresponds radius/height of each slice. Less radius, less recovery time.
+Both percentages and recovery times are labeled per slice for specific values.
+
+
+Willing to share this visualization publicly
+
+*/
+</script>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<style>
+/* all element styling should go here */
+.bar {
+  fill: steelblue;
+}
+
+.bar2 {
+  fill: deepskyblue;
+}
+
+.legend rect {
+  fill:white;
+  stroke:black;
+  opacity:0.8;
+}
+</style>
+<svg id="thevis" width="800" height="500"></svg> <!-- do not change this line -->
+<script src="lib/d3.v4.js"></script> <!-- change to d3.v3.js if you want -->
+<script src="student.js"></script> <!-- do not change this line -->
+<script>
+/* code for creating bad visualization goes here */
+
+var svg = d3.select("svg");
+console.log(svg);
+var margin = {top: 30, right: 10, bottom: 20, left: 30};
+var width = +svg.attr("width") - margin.left - margin.right;
+var height = +svg.attr("height") - margin.top - margin.bottom;
+
+var x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
+    y = d3.scaleLinear().rangeRound([height, 0]);
+var x1 = d3.scaleBand()
+    .padding(0.05);
+var container = svg.append("g") // add a "g" inside svg
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+var thedata;
+var color = d3.scaleOrdinal()
+    .range(["steelblue", "deepskyblue"]);
+d3.csv("data/asics.csv", function(d) {
+  d.percentage = +d.percentage;
+  d.recovery = +d.recovery;
+  //console.log('got row: ', d);
+
+  return d;
+}, function(error, Data) {
+  if (error) throw error;
+  console.log('got data: ', Data);
+  thedata = Data;
+  var keys = Data.columns.slice(1);
+  x.domain(Data.map(function(d) { return d.part; }));
+  x1.domain(keys).rangeRound([0, x.bandwidth()]);
+  y.domain([0, d3.max(Data, function(d) { return d.percentage; })]);
+
+
+  container.append("g")
+      .attr("class", "axis axis--x")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x))
+
+  container.append("g")
+      .attr("class", "axis axis--x")
+      .attr("transform", "translate(0," + height + ")")
+      //.attr("y", 10)
+      .call(d3.axisBottom(x))
+
+   container.append("g")
+      .attr("class", "axis axis--y")
+      .call(d3.axisLeft(y))
+    .append("text")
+      .attr("y", 10)
+  //  .attr("dy", "0.71em")
+      .attr("transform", "rotate(-90)")
+    //  .attr("text-anchor", "end")
+      .attr("fill", "#000")
+      .text("Percentage of Injuries/Number of Days Recovery");
+
+  var parts = container.selectAll(".bar")
+    .data(Data)
+    .enter().append("g")
+
+
+  container.append("g")
+    .selectAll("g")
+    .data(Data)
+    .enter().append("g")
+      .attr("transform", function(d) { return "translate(" + x(d.part) + ",0)"; })
+    .selectAll("rect")
+    .data(function(d) { return keys.map(function(key) { return {key: key, value: d[key]}; }); })
+    .enter().append("rect")
+      .attr("x", function(d) { return x1(d.key); })
+      .attr("y", function(d) { return y(d.value); })
+      .attr("width", x1.bandwidth())
+      .attr("height", function(d) { return height - y(d.value); })
+      .attr("fill", function(d) { return color(d.key); });
+
+  // parts.append("rect")
+  //     .attr("class", "bar")
+  //     .attr("x", function(d) { return x(d.part); })
+  //     .attr("width", x.bandwidth())
+  //     .attr("y", function(d) { return y(d.percentage); })
+  //     .attr("height", function(d) { return height - y(d.percentage); });
+
+  // parts.append("rect")
+  //     .attr("class", "bar2")
+  //     .attr("x" ,function(d) { return x(d.part); })
+  //     .attr("width", x.bandwidth()/2)
+  //     .attr("y", function(d) { return y(d.recovery)})
+  //     .attr("height", function(d) { return height - y(d.recovery);});
+
+  var legend = container.append("g")
+      .attr("font-size", 11)
+      .attr("text-anchor", "end")
+    .selectAll("g")
+    .data(keys.slice().reverse())
+    .enter().append("g")
+      .attr("transform", function(d, i) { return "translate(0," + ((i * 25) + 100) + ")"; });
+
+  legend.append("rect")
+      .attr("x", width -20)
+      .attr("width", 20)
+      .attr("height", 20)
+      .attr("fill", color);
+
+  legend.append("text")
+      .attr("x", width - 30)
+      .attr("y", 15)
+      .text(function(d) { return d; });
+  d3.select("svg").append("text")
+    .attr("x", width/7  )
+    .attr("y", 20)
+    .style("font-size", "25px")
+    .text("Frequency and Recovery Time of Running Injuries");
+
+d3.select("svg").append("text")
+  .attr("x", width/2.7 )
+  .attr("y", 50)
+  .style("font-size", "12px")
+  .text("if bar is steelblue, y-axis refers to percentage of injuries; if deepskyblue, # of days recovery");
+});
+
+/* Answer assignment questions here:
+
+References:
+lab1 index.html, index2.html
+lab2 index.html
+https://bl.ocks.org/mbostock/3887051
+https://bl.ocks.org/mbostock/3885304
+
+1)
+a) part: parts encoded on x-axis laid out by grouped bar chart.
+
+b) percentage: percentage encoded on y-axis, height of a steelblue bar refers to
+              the percentage of that type of injury
+
+c) recovery: recovery encoded on y-axis as well, shared with percentage. Height of
+            deep sky blue bar refers to the number of days of recovery.
+
+
+2) This visualization is bad because the y-axis encodes for both percentages and days.
+They are two separate variables on the same axis which is confusing. Only by using the legend
+(and they are similar colors too) can u determine which bar corresponds to which variable.
+
+
+Willing to share this visualization publicly.
+
+*/
+</script>
